@@ -18,7 +18,7 @@ test_that("diagnostics return finite test statistics", {
   capture.output(bp <- ev_hetero(fit, "bpg"))
   capture.output(white <- ev_hetero(fit, "white", cross = TRUE))
   capture.output(reset <- ev_reset(fit))
-  capture.output(jb <- ev_normality(fit))
+  capture.output(jb <- ev_normality(fit, plot = FALSE))
   expect_true(all(is.finite(bp$statistics)))
   expect_true(all(is.finite(white$statistics)))
   expect_true(all(is.finite(reset$statistics)))
@@ -130,4 +130,26 @@ test_that("RESET reproduces EViews mtcars test and full layout", {
   expect_lt(which(grepl("Coefficient", lines, fixed = TRUE))[1],
             which(grepl("R-squared.*Mean dependent var", lines))[1])
   expect_true(all(is.finite(reset$details[["Equation statistics"]])))
+})
+
+
+test_that("normality histogram can be disabled without changing results", {
+  fit <- lm(mpg ~ wt + hp, data = mtcars)
+  out <- capture.output(a <- ev_normality(fit, plot = FALSE))
+  expect_s3_class(a, "evreport")
+  expect_equal(unname(a$statistics[["Jarque-Bera"]]),
+               32 / 6 * (a$statistics[["Skewness"]]^2 +
+               (a$statistics[["Kurtosis"]] - 3)^2 / 4))
+  expect_true(any(grepl("Jarque-Bera", out, fixed = TRUE)))
+  expect_error(ev_normality(fit, plot = NA), "plot")
+})
+
+test_that("normality histogram renders in base graphics", {
+  fit <- lm(mpg ~ wt + hp, data = mtcars)
+  path <- tempfile(fileext = ".pdf")
+  grDevices::pdf(path, width = 10, height = 5)
+  on.exit({ grDevices::dev.off(); unlink(path) }, add = TRUE)
+  capture.output(a <- ev_normality(fit, breaks = 8))
+  expect_s3_class(a, "evreport")
+  expect_true(is.finite(a$statistics[["Probability"]]))
 })

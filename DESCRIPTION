@@ -1,6 +1,6 @@
 Package: evreport
 Title: EViews-Style Regression Reporting and Diagnostic Tests
-Version: 0.1.5
+Version: 0.1.6
 Description: Provides EViews-style summaries and diagnostic
     tests for linear regression models in R.
 License: MIT + file LICENSE
