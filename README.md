@@ -17,10 +17,8 @@ install.packages("remotes")
 Then install `evreport`:
 
 ```r
-remotes::install_github("USERNAME/evreport")
+remotes::install_github("kiganev/evreport")
 ```
-
-Replace `USERNAME` with the GitHub username of the repository owner.
 
 Once installed, load the package:
 
