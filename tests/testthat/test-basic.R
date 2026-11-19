@@ -52,3 +52,28 @@ test_that("BG test equation prints its own overall F-statistic", {
                  ((1 - unname(aux[["R-squared"]])) / 27), tolerance = 1e-8)
   expect_false(any(grepl("F-statistic\\s+NA", lines)))
 })
+
+
+test_that("heteroskedasticity output has full EViews layout", {
+  fit <- lm(mpg ~ wt + hp, mtcars)
+  for (kind in c("bpg", "white")) {
+    lines <- capture.output(result <- ev_hetero(fit, type = kind))
+    expect_true(any(grepl("Scaled explained SS.*Prob. Chi-Square", lines)))
+    expect_true(any(grepl("F-statistic.*Prob. F", lines)))
+    expect_true(any(grepl("Obs\\*R-squared.*Prob. Chi-Square", lines)))
+    expect_true(any(grepl("Dependent Variable: RESID^2", lines, fixed = TRUE)))
+    expect_true(any(grepl("R-squared.*Mean dependent var", lines)))
+    expect_lt(which(grepl("Coefficient", lines, fixed = TRUE))[1],
+              which(grepl("R-squared.*Mean dependent var", lines))[1])
+    ssr <- sum(resid(fit)^2)
+    aux <- result$auxiliary_model
+    y <- resid(fit)^2
+    ess <- sum((y - mean(y))^2) - sum(resid(aux)^2)
+    expected <- ess / (2 * (ssr / df.residual(fit))^2)
+    expect_equal(unname(result$statistics[["Scaled explained SS"]]),
+                 expected, tolerance = 1e-8)
+    auxstats <- result$details[["Equation statistics"]]
+    expect_equal(unname(auxstats[["F-statistic"]]),
+                 unname(result$statistics[["F-statistic"]]))
+  }
+})

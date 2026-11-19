@@ -86,6 +86,7 @@
 print.evreport <- function(x, ...) {
   is_equation <- identical(x$title, "Least Squares")
   is_bg <- startsWith(x$title, "Breusch-Godfrey")
+  is_hetero <- startsWith(x$title, "Heteroskedasticity Test:")
   cat("\n", x$title, if (is_bg) ":" else "", "\n", sep = "")
   cat(strrep("=", 79), "\n")
 
@@ -112,6 +113,27 @@ print.evreport <- function(x, ...) {
     .ev_print_coefficients(x$coefficients)
     if (!is.null(x$details[["Equation statistics"]]))
       .ev_print_equation_stats(x$details[["Equation statistics"]])
+  } else if (is_hetero) {
+    df1 <- as.integer(x$details[["Test degrees of freedom"]])
+    df2 <- as.integer(x$details[["Residual degrees of freedom"]])
+    cat("Null hypothesis: Homoskedasticity\n\n")
+    cat(sprintf("%-20s %13.6f   %-22s %.6g\n",
+                "F-statistic", x$statistics[["F-statistic"]],
+                sprintf("Prob. F(%d,%d)", df1, df2),
+                x$statistics[["Prob. F"]]))
+    cat(sprintf("%-20s %13.6f   %-22s %.6g\n",
+                "Obs*R-squared", x$statistics[["Obs*R-squared"]],
+                sprintf("Prob. Chi-Square(%d)", df1),
+                x$statistics[["Prob. Chi-Square"]]))
+    cat(sprintf("%-20s %13.6f   %-22s %.6g\n",
+                "Scaled explained SS", x$statistics[["Scaled explained SS"]],
+                sprintf("Prob. Chi-Square(%d)", df1),
+                x$statistics[["Prob. Scaled explained SS"]]))
+    cat("\n", strrep("=", 79), "\n", sep = "")
+    cat("Test Equation:\nDependent Variable: RESID^2\nMethod: Least Squares\n")
+    cat("Included observations:", x$details[["Included observations"]], "\n\n")
+    .ev_print_coefficients(x$coefficients)
+    .ev_print_equation_stats(x$details[["Equation statistics"]])
   } else {
     for (nm in names(x$details)) {
       if (!is.list(x$details[[nm]])) cat(nm, ": ", x$details[[nm]], "\n", sep = "")

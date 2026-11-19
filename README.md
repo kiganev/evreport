@@ -1,32 +1,25 @@
-# evreport (prototype 0.1.0)
+# evreport (prototype 0.1.3)
 
 An **unofficial, EViews-inspired** console report package for ordinary unweighted R `lm` models.
 
 This is a prototype, **not yet validated against actual EViews regression reports**. The output is inspired by EViews, not a claim of bit-for-bit numerical or visual equivalence.
 
-## Installation
+## Install
 
-The development version of `evreport` can be installed directly from GitHub using the `remotes` package.
-
-First, install `remotes` if it is not already installed:
+From the **directory containing `evreport/`**, run:
 
 ```r
-install.packages("remotes")
+install.packages("evreport", repos = NULL, type = "source")
 ```
 
-Then install `evreport`:
+If the package is supplied as a zip archive, **unzip it first**. The archive is a source-folder distribution, not an R Windows binary package.
+
+## Install directly from GitHub
 
 ```r
+install.packages("remotes") # once only
 remotes::install_github("kiganev/evreport")
 ```
-
-Once installed, load the package:
-
-```r
-library(evreport)
-```
-
-To update to the latest development version, run `remotes::install_github()` again.
 
 ## Examples
 
@@ -52,8 +45,8 @@ res$auxiliary_model
 
 * Only ordinary **unweighted, full-rank, non-offset `lm`** regressions supported.
 * BG uses presample-zero lagged residuals and **uncentered** `n * R²`, as specified in EViews' documentation. Observations must be in proper consecutive time order. The BG F probability is an approximation, as EViews notes.
-* White default is **without cross terms**; `cross = TRUE` adds pairwise products. Redundant terms (e.g. squared binary dummies) are dropped via QR rank selection. The White/BPG helper provides F and `Obs*R-squared` but **not** EViews' additional scaled explained sum of squares statistic.
-* BPG here refers to the unstudentized squared-residual auxiliary regression `n * R²`, rather than R's default studentized `lmtest::bptest`. Such variants can differ.
+* White default is **without cross terms**; `cross = TRUE` adds pairwise products. Redundant terms (e.g. squared binary dummies) are dropped via QR rank selection. The White/BPG output includes F, `Obs*R-squared`, and `Scaled explained SS`, followed by the auxiliary squared-residual regression and the full two-column equation statistics. Date/time and sample period are omitted.
+* BPG here refers to the unstudentized squared-residual auxiliary regression `n * R²`, not necessarily the same as the default studentized `lmtest::bptest`. Such variants can differ.
 * RESET uses fitted values raised to user-selected powers. Only the standard nested-model F test is printed.
 * Information criteria are normalized by sample size and use **k regression coefficients**, excluding sigma², following the EViews-style convention.
 * No automatic detection of gaps in time-series data or date ranges. EViews tests may differ for ARMA regressions, different covariance estimators, and other advanced options.
