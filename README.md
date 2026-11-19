@@ -69,3 +69,7 @@ Official documentation: https://help.eviews.com/content/testing-Residual_Diagnos
 ### RESET output
 
 `ev_reset(fit, powers = 2:3)` now shows the EViews-style F and likelihood-ratio tests, F-test SSR decomposition, restricted/unrestricted log likelihoods, and the complete unrestricted equation. Date/time/sample fields are omitted.
+
+## Documentation
+
+[Reference Manual (PDF)](docs/evreport_reference_manual_v0.1.6.pdf)
