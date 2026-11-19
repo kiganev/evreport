@@ -1,11 +1,11 @@
 ---
-title: "evreport"
-subtitle: "Reference Manual — Version 0.1.6"
-author: "Unofficial EViews-style regression reporting for R"
+title: "evreport Reference Manual"
+author: "Kaloyan Ganev"
 date: "19 November 2026"
 lang: en-US
-geometry: margin=0.85in
-fontsize: 10pt
+fontfamily: mathpazo
+fontsize: 11pt
+geometry: margin=2.5cm
 colorlinks: true
 linkcolor: blue
 header-includes:
