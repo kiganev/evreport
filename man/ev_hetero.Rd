@@ -6,7 +6,7 @@
 \arguments{
 \item{model}{An unweighted, full-rank lm fit with an intercept.}
 \item{type}{Either "bpg" or "white".}
-\item{cross}{Include pairwise cross products for the White test. Default FALSE.}
+\item{cross}{For the White test, FALSE uses only squared original slopes; TRUE uses their squares, levels and pairwise products.}
 }
 \details{Returns the auxiliary-regression F statistic, Obs*R-squared and Scaled explained SS, with p-values. Scaled explained SS equals auxiliary explained sum of squares divided by twice the square of the original regression's error variance estimate. EViews' date/time and sample-period metadata are omitted.}
 \value{An evreport object, including statistics, coefficients, details and auxiliary_model.}

@@ -1,14 +1,15 @@
 #' Breusch-Pagan-Godfrey or White heteroskedasticity test
 #' @param model An unweighted, full-rank lm object with an intercept.
 #' @param type Either "bpg" or "white".
-#' @param cross Include pairwise cross products in the White test (default FALSE).
+#' @param cross For White: FALSE uses squared slopes only; TRUE adds levels and pairwise products.
 #' @return An evreport result containing three test statistics, their probabilities,
 #'   auxiliary regression coefficients and an auxiliary lm model.
 #' @details The auxiliary dependent variable is the original squared OLS residual.
 #'   EViews displays F, Obs*R-squared and Scaled explained SS. The last statistic
 #'   uses the explained sum of squares of the auxiliary regression divided by
 #'   twice the squared original regression's estimated error variance.
-#'   White tests omit cross products by default, as in the EViews menu option.
+#'   White with cross = FALSE uses squared regressors only; cross = TRUE uses
+#'   levels, squares and interactions as in the supplied EViews reference reports.
 #' @export
 #' @examples
 #' ev_hetero(lm(mpg ~ wt + hp, data = mtcars), type = "white")
@@ -26,22 +27,27 @@ ev_hetero <- function(model, type = c("bpg", "white"), cross = FALSE) {
   base <- X[, colnames(X) != "(Intercept)", drop = FALSE]
   if (ncol(base) < 1L) stop("At least one slope regressor is required.", call. = FALSE)
 
-  # Keep the intercept first. For White, report squares before linear terms.
+  # EViews reference cases:
+  # Without cross terms: constant, each original regressor squared.
+  # With cross terms: constant, squares, pairwise products and levels.
+  # Arrange full-test columns in the same order as the reference EViews report.
   if (type == "white") {
-    sq <- base^2
-    colnames(sq) <- paste0(colnames(base), "^2")
-    A <- cbind(`(Intercept)` = 1, sq, base)
-    if (cross && ncol(base) > 1L) {
-      pairs <- combn(ncol(base), 2L)
-      products <- sapply(seq_len(ncol(pairs)), function(i) {
-        base[, pairs[1L, i]] * base[, pairs[2L, i]]
-      })
-      if (is.null(dim(products))) products <- matrix(products, ncol = 1L)
-      colnames(products) <- apply(pairs, 2L, function(z) {
-        paste(colnames(base)[z], collapse = ":")
-      })
-      A <- cbind(A, products)
+    terms <- list(`(Intercept)` = rep(1, n))
+    for (i in seq_len(ncol(base))) {
+      xi <- base[, i]
+      name_i <- colnames(base)[i]
+      terms[[paste0(name_i, "^2")]] <- xi^2
+      if (cross) {
+        if (i < ncol(base)) {
+          for (j in seq.int(i + 1L, ncol(base))) {
+            name_j <- colnames(base)[j]
+            terms[[paste0(name_i, "*", name_j)]] <- xi * base[, j]
+          }
+        }
+        terms[[name_i]] <- xi
+      }
     }
+    A <- do.call(cbind, terms)
   } else {
     A <- cbind(`(Intercept)` = 1, base)
   }

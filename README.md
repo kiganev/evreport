@@ -1,4 +1,4 @@
-# evreport (prototype 0.1.3)
+# evreport (prototype 0.1.4)
 
 An **unofficial, EViews-inspired** console report package for ordinary unweighted R `lm` models.
 
@@ -45,7 +45,7 @@ res$auxiliary_model
 
 * Only ordinary **unweighted, full-rank, non-offset `lm`** regressions supported.
 * BG uses presample-zero lagged residuals and **uncentered** `n * R²`, as specified in EViews' documentation. Observations must be in proper consecutive time order. The BG F probability is an approximation, as EViews notes.
-* White default is **without cross terms**; `cross = TRUE` adds pairwise products. Redundant terms (e.g. squared binary dummies) are dropped via QR rank selection. The White/BPG output includes F, `Obs*R-squared`, and `Scaled explained SS`, followed by the auxiliary squared-residual regression and the full two-column equation statistics. Date/time and sample period are omitted.
+* White default uses **squared regressors only**; `cross = TRUE` uses their squares, levels, and pairwise products. The latter includes five slopes for `mpg ~ wt + hp`, matching the EViews comparison. Redundant terms (e.g. squared binary dummies) are dropped via QR rank selection. The White/BPG output includes F, `Obs*R-squared`, and `Scaled explained SS`, followed by the auxiliary squared-residual regression and the full two-column equation statistics. Date/time and sample period are omitted.
 * BPG here refers to the unstudentized squared-residual auxiliary regression `n * R²`, not necessarily the same as the default studentized `lmtest::bptest`. Such variants can differ.
 * RESET uses fitted values raised to user-selected powers. Only the standard nested-model F test is printed.
 * Information criteria are normalized by sample size and use **k regression coefficients**, excluding sigma², following the EViews-style convention.

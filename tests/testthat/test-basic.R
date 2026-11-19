@@ -77,3 +77,27 @@ test_that("heteroskedasticity output has full EViews layout", {
                  unname(result$statistics[["F-statistic"]]))
   }
 })
+
+
+test_that("White variants reproduce supplied EViews mtcars results", {
+  fit <- lm(mpg ~ wt + hp, data = mtcars)
+  capture.output(no_cross <- ev_hetero(fit, type = "white", cross = FALSE))
+  capture.output(full <- ev_hetero(fit, type = "white", cross = TRUE))
+
+  expect_identical(rownames(no_cross$coefficients), c("(Intercept)", "wt^2", "hp^2"))
+  expect_identical(rownames(full$coefficients),
+    c("(Intercept)", "wt^2", "wt*hp", "wt", "hp^2", "hp"))
+
+  expect_equal(unname(no_cross$statistics[["F-statistic"]]),
+               0.2266091157943661, tolerance = 1e-6)
+  expect_equal(unname(no_cross$statistics[["Obs*R-squared"]]),
+               0.4924074271545962, tolerance = 1e-6)
+  expect_equal(unname(no_cross$statistics[["Scaled explained SS"]]),
+               0.4714688501474768, tolerance = 1e-6)
+  expect_equal(unname(full$statistics[["F-statistic"]]),
+               1.336534710167772, tolerance = 1e-6)
+  expect_equal(unname(full$statistics[["Obs*R-squared"]]),
+               6.543086302110516, tolerance = 1e-6)
+  expect_equal(unname(full$statistics[["Scaled explained SS"]]),
+               6.264855493951078, tolerance = 1e-6)
+})
