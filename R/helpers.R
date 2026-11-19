@@ -87,6 +87,7 @@ print.evreport <- function(x, ...) {
   is_equation <- identical(x$title, "Least Squares")
   is_bg <- startsWith(x$title, "Breusch-Godfrey")
   is_hetero <- startsWith(x$title, "Heteroskedasticity Test:")
+  is_reset <- identical(x$title, "Ramsey RESET Test")
   cat("\n", x$title, if (is_bg) ":" else "", "\n", sep = "")
   cat(strrep("=", 79), "\n")
 
@@ -113,6 +114,35 @@ print.evreport <- function(x, ...) {
     .ev_print_coefficients(x$coefficients)
     if (!is.null(x$details[["Equation statistics"]]))
       .ev_print_equation_stats(x$details[["Equation statistics"]])
+  } else if (is_reset) {
+    q <- as.integer(x$details[["Test degrees of freedom"]])
+    dfu <- as.integer(x$details[["Residual degrees of freedom"]])
+    pow <- x$details[["Powers"]]
+    cat("Omitted Variables: Powers of fitted values from ", min(pow),
+        " to ", max(pow), "\n", sep = "")
+    cat("Specification:", x$details[["Specification"]], "\n\n")
+    cat(sprintf("%-20s %14s %14s %14s\n", "", "Value", "df", "Probability"))
+    cat(sprintf("%-20s %14.6f %14s %14.6g\n",
+                "F-statistic", x$statistics[["F-statistic"]],
+                sprintf("(%d, %d)", q, dfu), x$statistics[["Prob. F"]]))
+    cat(sprintf("%-20s %14.6f %14d %14.6g\n",
+                "Likelihood ratio", x$statistics[["Likelihood ratio"]],
+                q, x$statistics[["Prob. Chi-Square"]]))
+    ftab <- x$details[["F-test summary"]]
+    cat("\nF-test summary:\n")
+    cat(sprintf("%-23s %16s %8s %16s\n", "", "Sum of Sq.", "df", "Mean Squares"))
+    for (i in seq_len(nrow(ftab)))
+      cat(sprintf("%-23s %16.6f %8d %16.6f\n",
+                  rownames(ftab)[i], ftab[i, 1], as.integer(ftab[i, 2]), ftab[i, 3]))
+    cat("\nLR test summary:\n")
+    for (nm in names(x$details[["LR test summary"]]))
+      cat(sprintf("%-23s %16.6f\n", nm, x$details[["LR test summary"]][[nm]]))
+    cat("\n", strrep("=", 79), "\n", sep = "")
+    cat("Unrestricted Test Equation:\nDependent Variable: ",
+        x$details[["Dependent Variable"]], "\nMethod: Least Squares\n", sep = "")
+    cat("Included observations:", x$details[["Included observations"]], "\n\n")
+    .ev_print_coefficients(x$coefficients)
+    .ev_print_equation_stats(x$details[["Equation statistics"]])
   } else if (is_hetero) {
     df1 <- as.integer(x$details[["Test degrees of freedom"]])
     df2 <- as.integer(x$details[["Residual degrees of freedom"]])

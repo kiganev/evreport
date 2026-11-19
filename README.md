@@ -1,4 +1,4 @@
-# evreport (prototype 0.1.4)
+# evreport (prototype 0.1.5)
 
 An **unofficial, EViews-inspired** console report package for ordinary unweighted R `lm` models.
 

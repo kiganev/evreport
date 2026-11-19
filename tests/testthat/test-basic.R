@@ -101,3 +101,33 @@ test_that("White variants reproduce supplied EViews mtcars results", {
   expect_equal(unname(full$statistics[["Scaled explained SS"]]),
                6.264855493951078, tolerance = 1e-6)
 })
+
+
+test_that("RESET reproduces EViews mtcars test and full layout", {
+  fit <- lm(mpg ~ wt + hp, data = mtcars)
+  lines <- capture.output(reset <- ev_reset(fit, powers = 2:3))
+  expect_equal(unname(reset$statistics[["F-statistic"]]),
+               7.238403935158949, tolerance = 1e-6)
+  expect_equal(unname(reset$statistics[["Likelihood ratio"]]),
+               13.73752187267368, tolerance = 1e-6)
+  expect_equal(unname(reset$statistics[["Prob. F"]]),
+               0.003041157619883153, tolerance = 1e-6)
+  expect_equal(unname(reset$statistics[["Prob. Chi-Square"]]),
+               0.001039764601316361, tolerance = 1e-6)
+  ftab <- reset$details[["F-test summary"]]
+  expect_equal(ftab["Test SSR", "Sum of Sq."],
+               68.07825905401455, tolerance = 1e-6)
+  expect_equal(ftab["Restricted SSR", "Sum of Sq."],
+               195.0477547414661, tolerance = 1e-6)
+  expect_equal(ftab["Unrestricted SSR", "Sum of Sq."],
+               126.9694956874515, tolerance = 1e-6)
+  expect_identical(rownames(reset$coefficients),
+                   c("(Intercept)", "wt", "hp", "FITTED^2", "FITTED^3"))
+  expect_true(any(grepl("F-test summary:", lines, fixed = TRUE)))
+  expect_true(any(grepl("LR test summary:", lines, fixed = TRUE)))
+  expect_true(any(grepl("Unrestricted Test Equation:", lines, fixed = TRUE)))
+  expect_true(any(grepl("R-squared.*Mean dependent var", lines)))
+  expect_lt(which(grepl("Coefficient", lines, fixed = TRUE))[1],
+            which(grepl("R-squared.*Mean dependent var", lines))[1])
+  expect_true(all(is.finite(reset$details[["Equation statistics"]])))
+})
